@@ -1,9 +1,8 @@
 const express = require("express");
-const path = require("path");
+const dotenv = require("dotenv");
 const app = express();
-const port = 8080;
+const PORT = process.env.PORT || 5000;
 const cors = require("cors");
-
 var bodyParser = require("body-parser");
 
 app.use(bodyParser.json());
@@ -15,24 +14,18 @@ app.use(
   })
 );
 
+app.use(require("./router/auth"));
+
+const middleware = (req, res, next) => {
+  next();
+};
+
 const mongoose = require("mongoose");
-mongoose.connect("mongodb://localhost:27017/learningnode");
+mongoose.connect("mongodb://localhost:27017/sss");
 var db = mongoose.connection;
 db.on("error", console.log.bind(console, "connection error"));
 db.once("open", function (callback) {
-  console.log("connection succeeded");
-});
-
-app.get("/getworld", (req, res) => {
-  res.status(200).send("Hello World! this is node");
-});
-
-app.post("/postWorld", (req, res) => {
-  res.status(200).send("Hello World! Post Request");
-});
-
-app.get("/notfound", (req, res) => {
-  res.status(400).send("page not found");
+  console.log("connected");
 });
 
 app.post("/signup", function (req, res) {
@@ -45,23 +38,14 @@ app.post("/signup", function (req, res) {
     email: email,
     password: pass,
   };
-  db.collection("users").insertOne(data, function (err, collection) {
+  db.collection("details").insertOne(data, function (err, collection) {
     if (err) throw err;
-    console.log("data added");
+    console.log("Data added");
   });
 
   return res.redirect("success.html");
 });
 
-app
-  .get("/", function (req, res) {
-    res.set({
-      "Access-control-Allow-Origin": "*",
-    });
-    return res.redirect("index.html");
-  })
-  .listen(3000);
-
-app.listen(port, () => {
-  console.log(`Server is listening on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is listening on port ${PORT}`);
 });
